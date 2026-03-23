@@ -1,0 +1,58 @@
+// Retail ER Model
+
+
+Table dim_customer {
+  customer_id   varchar [pk]
+  full_name     varchar
+  email         varchar
+  segment       varchar   // e.g. Premium, Regular, Budget
+  region        varchar
+  country       varchar
+  created_at    date
+}
+
+Table dim_product {
+  product_id    varchar [pk]
+  product_name  varchar
+  category      varchar   // e.g. Electronics, Apparel, Grocery
+  sub_category  varchar
+  unit_price    float
+}
+
+Table dim_store {
+  store_id      varchar [pk]
+  store_name    varchar
+  city          varchar
+  country       varchar
+  store_type    varchar   // e.g. Online, Offline
+}
+
+Table dim_date {
+  date_id       varchar [pk]
+  full_date     date
+  day           int
+  month         int
+  quarter       int
+  year          int
+  is_weekend    boolean
+}
+
+Table fact_orders {
+  order_id      varchar [pk]
+  customer_id   varchar [ref: > dim_customer.customer_id]
+  store_id      varchar [ref: > dim_store.store_id]
+  date_id       varchar [ref: > dim_date.date_id]
+  status        varchar   // e.g. Completed, Cancelled, Returned
+  total_amount  float
+  channel       varchar   // e.g. Online, In-Store
+}
+
+Table fact_order_line_items {
+  line_item_id  varchar [pk]
+  order_id      varchar [ref: > fact_orders.order_id]
+  product_id    varchar [ref: > dim_product.product_id]
+  quantity      int
+  unit_price    float
+  discount      float
+  line_total    float
+}

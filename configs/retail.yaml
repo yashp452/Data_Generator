@@ -1,0 +1,150 @@
+domain: retail
+
+output:
+  format: csv                   # parquet | csv | json
+  base_directory: ./output      # domain folder created automatically: ./output/retail/
+
+tables:
+
+  customers:
+    table_type: dimension
+    row_count: 10000            # new records added each run
+    columns:
+      customer_id:
+        type: pk
+        prefix: CUST
+      full_name:
+        type: faker
+        method: name
+      email:
+        type: faker
+        method: email
+      segment:
+        type: choice
+        values: [Premium, Regular, Budget]
+        weights: [0.20, 0.55, 0.25]
+      region:
+        type: choice
+        values: [North, South, East, West]
+      country:
+        type: faker
+        method: country
+      created_at:
+        type: date_range
+        start: "2018-01-01"
+        end: "2023-12-31"       # customers pre-exist their orders
+
+  products:
+    table_type: dimension
+    row_count: 5000             # new records added each run
+    columns:
+      product_id:
+        type: pk
+        prefix: PROD
+      product_name:
+        type: faker
+        method: catch_phrase
+      category:
+        type: choice
+        values: [Electronics, Apparel, Grocery, Home & Garden, Sports]
+      unit_price:
+        type: random_float
+        min: 5.0
+        max: 2000.0
+        round: 2
+
+  stores:
+    table_type: dimension
+    row_count: 1000              # new records added each run
+    columns:
+      store_id:
+        type: pk
+        prefix: STORE
+      store_name:
+        type: faker
+        method: company
+      city:
+        type: faker
+        method: city
+      country:
+        type: faker
+        method: country
+      store_type:
+        type: choice
+        values: [Online, Offline]
+        weights: [0.35, 0.65]
+
+  orders:
+    table_type: fact
+    row_count: 500000         # new records added each run
+    columns:
+      order_id:
+        type: pk
+        prefix: ORD
+      customer_id:
+        type: fk
+        references: customers.customer_id
+      store_id:
+        type: fk
+        references: stores.store_id
+      order_date:
+        type: date_range
+        start: "2020-01-01"
+        end: "2025-12-31"       # full years only — no future dates that create dashboard cliffs
+      status:
+        type: choice
+        values: [Completed, Cancelled, Returned, Pending]
+        weights: [0.75, 0.10, 0.10, 0.05]
+      total_amount:
+        type: post_aggregate        # computed as sum of line_totals after line items are generated
+        source_table: order_line_items
+        source_column: line_total
+        group_by: order_id
+        func: sum
+        round: 2
+      channel:
+        type: choice
+        values: [Online, In-Store]
+        weights: [0.40, 0.60]
+
+  order_line_items:
+    table_type: fact
+    items_per_parent:           # generate line items per order (guarantees no orphan orders)
+      fk_column: order_id
+      parent_table: orders
+      min: 1
+      max: 5
+    # row_count ignored when items_per_parent is set
+    row_count: 1500000
+    columns:
+      line_item_id:
+        type: pk
+        prefix: LI
+      order_id:
+        type: fk
+        references: orders.order_id
+      product_id:
+        type: fk
+        references: products.product_id
+      quantity:
+        type: random_int
+        min: 1
+        max: 8
+      unit_price:
+        type: random_float
+        min: 5.0
+        max: 300.0
+        round: 2
+      discount:
+        type: random_float
+        min: 0.0
+        max: 0.30
+        round: 2
+      line_total:
+        type: formula
+        expression: "quantity * unit_price * (1 - discount)"
+        round: 2
+      created_at:
+        type: date_range
+        start: "2020-01-01"
+        end: "2025-12-31"

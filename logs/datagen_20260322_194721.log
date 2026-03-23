@@ -1,0 +1,36 @@
+========================================
+Run started at: Sun Mar 22 19:47:21 IST 2026
+========================================
+
+════════════════════════════════════════════════════════════
+Config: configs/retail.yaml
+════════════════════════════════════════════════════════════
+
+Domain : retail  |  Run #2 — growing dims + adding facts
+Format : csv
+Order  : dim_customer → dim_product → dim_store → dim_date → fact_orders → fact_order_line_items
+────────────────────────────────────────────────────────────
+
+[Dimensions]
+  Exported     20,000 rows  →  ./output/retail/dims/dim_customer.csv
+  dim_customer: +10,000 new → 20,000 total (1.19s)
+  Exported     10,000 rows  →  ./output/retail/dims/dim_product.csv
+  dim_product: +5,000 new → 10,000 total (0.03s)
+  Exported      2,000 rows  →  ./output/retail/dims/dim_store.csv
+  dim_store: +1,000 new → 2,000 total (0.12s)
+  dim_date: loaded 2,922 rows (fixed)
+
+[Facts → run_002]
+  Exported    500,000 rows  →  ./output/retail/facts/run_002/fact_orders.csv
+  fact_orders: 500,000 rows, offset 5,000,000 → 5,500,000 (0.80s)
+  Exported  1,500,267 rows  →  ./output/retail/facts/run_002/fact_order_line_items.csv
+  fact_order_line_items: 1,500,267 rows, offset 15,002,144 → 16,502,411 (3.76s)
+
+[Post-aggregates → re-exporting: fact_orders]
+  Exported    500,000 rows  →  ./output/retail/facts/run_002/fact_orders.csv
+  State saved → ./output/retail/state.json
+
+────────────────────────────────────────────────────────────
+Domain 'retail' done in 7.47s
+========================================
+Run completed successfully at: Sun Mar 22 19:47:29 IST 2026
