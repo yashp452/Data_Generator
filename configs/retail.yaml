@@ -1,7 +1,7 @@
 domain: retail
 
 output:
-  format: csv                   # parquet | csv | json
+  format: parquet               # parquet | csv | json
   base_directory: ./output      # domain folder created automatically: ./output/retail/
 
 tables:
@@ -13,12 +13,14 @@ tables:
       customer_id:
         type: pk
         prefix: CUST
-      full_name:
-        type: faker
-        method: name
-      email:
-        type: faker
-        method: email
+      first_name:
+        type: lookup
+        seed_file: names.csv
+        seed_column: first_name
+      last_name:
+        type: lookup
+        seed_file: names.csv
+        seed_column: last_name
       segment:
         type: choice
         values: [Premium, Regular, Budget]
@@ -26,9 +28,23 @@ tables:
       region:
         type: choice
         values: [North, South, East, West]
+      city:
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: city
+        weight_column: population
+      state:
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: state
       country:
-        type: faker
-        method: country
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: country
+      zip_code:
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: zip_code
       created_at:
         type: date_range
         start: "2018-01-01"
@@ -42,16 +58,14 @@ tables:
         type: pk
         prefix: PROD
       product_name:
-        type: faker
-        method: catch_phrase
+        type: lookup
+        seed_file: products.csv
       category:
-        type: choice
-        values: [Electronics, Apparel, Grocery, Home & Garden, Sports]
+        type: lookup
+        seed_file: products.csv
       unit_price:
-        type: random_float
-        min: 5.0
-        max: 2000.0
-        round: 2
+        type: lookup
+        seed_file: products.csv
 
   stores:
     table_type: dimension
@@ -64,11 +78,22 @@ tables:
         type: faker
         method: company
       city:
-        type: faker
-        method: city
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: city
+        weight_column: population
+      state:
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: state
       country:
-        type: faker
-        method: country
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: country
+      zip_code:
+        type: lookup
+        seed_file: world_cities.csv
+        seed_column: zip_code
       store_type:
         type: choice
         values: [Online, Offline]
@@ -82,8 +107,9 @@ tables:
         type: pk
         prefix: ORD
       customer_id:
-        type: fk
+        type: fk_pareto
         references: customers.customer_id
+        alpha: 1.25
       store_id:
         type: fk
         references: stores.store_id
@@ -124,8 +150,9 @@ tables:
         type: fk
         references: orders.order_id
       product_id:
-        type: fk
+        type: fk_pareto
         references: products.product_id
+        alpha: 1.4
       quantity:
         type: random_int
         min: 1

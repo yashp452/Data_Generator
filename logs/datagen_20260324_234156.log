@@ -1,0 +1,33 @@
+========================================
+Run started at: Tue Mar 24 23:41:56 IST 2026
+========================================
+
+════════════════════════════════════════════════════════════
+Config: configs/retail.yaml
+════════════════════════════════════════════════════════════
+
+Domain : retail  |  Run #2 — growing dims + adding facts
+Format : csv
+Order  : customers → products → stores → orders → order_line_items
+────────────────────────────────────────────────────────────
+
+[Dimensions]
+Traceback (most recent call last):
+  File "/Users/kamleshwarpradhan/Desktop/Data_Generator/main.py", line 165, in <module>
+    main()
+    ~~~~^^
+  File "/Users/kamleshwarpradhan/Desktop/Data_Generator/main.py", line 39, in main
+    _run_domain(config_path, fmt_override=args.format)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kamleshwarpradhan/Desktop/Data_Generator/main.py", line 98, in _run_domain
+    new_df = generate_table(table_name, table_cfg, generated, pk_offset=offset)
+  File "/Users/kamleshwarpradhan/Desktop/Data_Generator/src/datagen/engine.py", line 86, in generate_table
+    dates = gen.generate_date_range(
+        row_count, col_cfg["start"], col_cfg["end"], col_cfg.get("sequential", False)
+    )
+  File "/Users/kamleshwarpradhan/Desktop/Data_Generator/src/datagen/generators.py", line 72, in generate_date_range
+    return (start_dt + pd.to_timedelta(random_days, unit='D')).dt.date.tolist()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DatetimeIndex' object has no attribute 'dt'
+========================================
+Run completed successfully at: Tue Mar 24 23:41:57 IST 2026

@@ -35,6 +35,16 @@ def generate_table(table_name: str, table_cfg: dict, generated_tables: dict[str,
         row_count = _resolve_row_count(table_cfg)
         df = pd.DataFrame()
 
+    # ── Table-level Lookups ────────────────────────────────────────────────────
+    table_lookups = {}
+    for col_cfg in columns_cfg.values():
+        if col_cfg.get("type") == "lookup":
+            seed_file = col_cfg["seed_file"]
+            if seed_file not in table_lookups:
+                table_lookups[seed_file] = gen.get_seed_sample(
+                    seed_file, row_count, weight_column=col_cfg.get("weight_column")
+                )
+
     # ── Column generation ──────────────────────────────────────────────────────
     for col_name, col_cfg in columns_cfg.items():
         col_type = col_cfg["type"]
@@ -54,6 +64,17 @@ def generate_table(table_name: str, table_cfg: dict, generated_tables: dict[str,
             ref_table, ref_col = col_cfg["references"].split(".")
             pk_series = generated_tables[ref_table][ref_col]
             df[col_name] = gen.generate_fk(row_count, pk_series)
+
+        elif col_type == "fk_pareto":
+            ref_table, ref_col = col_cfg["references"].split(".")
+            pk_series = generated_tables[ref_table][ref_col]
+            alpha = col_cfg.get("alpha", 1.2)
+            df[col_name] = gen.generate_fk_pareto(row_count, pk_series, alpha=alpha)
+
+        elif col_type == "lookup":
+            seed_file = col_cfg["seed_file"]
+            seed_col = col_cfg.get("seed_column", col_name)
+            df[col_name] = table_lookups[seed_file][seed_col].values
 
         elif col_type == "faker":
             df[col_name] = gen.generate_faker(row_count, col_cfg["method"])
